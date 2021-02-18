@@ -13,10 +13,8 @@ import {
 import BasicInfo from "./BasicInfo/BasicInfo";
 import Tickets from "./Tickets/Tickets";
 import RegistrationForm from "./RegistrationForm/RegistrationForm";
-import DebugStateModal from "./DebugStateModal"
-
-// Provides context for steps
-const eventInfoContext = React.createContext(null);
+import DebugStateModal from "./DebugStateModal";
+import EventInfoStore from "../../Stores/EventInfoStore";
 
 const useStyles = makeStyles((theme) => ({
   root: {},
@@ -39,31 +37,6 @@ const useStyles = makeStyles((theme) => ({
 const CreateEventBase = () => {
   const classes = useStyles();
 
-  // handleStepChange will update the eventInfo state
-  const handleStepChange = (step, propertyName, value) => {
-    setEventInfo((prev) => {
-      prev[step][propertyName] = value;
-      return { ...prev };
-    });
-  };
-
-  // create state for all steps
-  const [eventInfo, setEventInfo] = React.useState({
-    basicInfo: {
-      name: "",
-      email: "",
-    },
-    tickets: {
-        list: []
-    },
-    registrationForm: {},
-    confirmationEmail: {},
-    onChange: handleStepChange,
-    submitHandler: (values) => {
-      console.log("Base submitHandler", values);
-    },
-    isValid: false,
-  });
   const stepper = useStepper([
     {
       title: "Basic Info",
@@ -78,14 +51,15 @@ const CreateEventBase = () => {
       component: <RegistrationForm />,
     },
   ]);
-  React.useEffect(() => {
-    console.log("isValid", eventInfo.isValid);
-  }, [eventInfo]);
+  
   return (
     <React.Fragment>
-      <eventInfoContext.Provider value={eventInfo}>
-        {stepper.render()}
-      </eventInfoContext.Provider>
+      <EventInfoStore>
+        <React.Fragment>
+          {stepper.render()}
+          <DebugStateModal />
+        </React.Fragment>
+      </EventInfoStore>
 
       <Grid container>
         <Grid item xs={8} className={classes.buttonsGrid}>
@@ -104,20 +78,17 @@ const CreateEventBase = () => {
                   variant="outlined"
                   color="primary"
                   onClick={() => {
-                    eventInfo.submitHandler();
                     stepper.moveNext();
                   }}
-                  disabled={!(stepper.canMoveNext && eventInfo.isValid)}
+                  disabled={!(stepper.canMoveNext)}
                 >
                   Next
                 </Button>
-                [Step valid? {eventInfo.isValid ? "Yes!" : "Nah..."}]
               </Box>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
-      <DebugStateModal eventInfo={eventInfo} />
     </React.Fragment>
   );
 };
@@ -174,4 +145,3 @@ const useStepper = (steps) => {
 };
 
 export default CreateEventBase;
-export { eventInfoContext };

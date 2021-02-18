@@ -5,10 +5,10 @@ import CardContent from "@material-ui/core/CardContent";
 import Button from "@material-ui/core/Button";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import { eventInfoContext } from "../CreateEventBase";
 import CardHeader from "@material-ui/core/CardHeader";
 import { Divider, TextField } from "@material-ui/core";
 import { useFormik } from "formik";
+import {Context, actionTypes} from "../../../Stores/EventInfoStore";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,15 +17,16 @@ const useStyles = makeStyles((theme) => ({
 }));
 const Tickets = (props) => {
   const classes = useStyles();
-  const eventInfo = React.useContext(eventInfoContext);
+  const [eventInfo, dispatch] = React.useContext(Context);
   const [isValid, setIsValid] = React.useState(false);
 
   const handleSubmit = (values) => {
-    const newTickets = [...eventInfo.tickets.list];
-    newTickets.push(values);
-    setIsValid(true);
-    eventInfo.onChange("tickets", "list", newTickets);
+    dispatch({type: actionTypes.tickets_add, payload: values})
   };
+  const handleRemove = index => {
+    console.log('removing index', index)
+    dispatch({type: actionTypes.tickets_remove, payload: index});
+  }
 
   eventInfo.isValid = isValid;
   return (
@@ -37,8 +38,8 @@ const Tickets = (props) => {
         </Typography>
         <Divider />
         <Typography variant="h6">Existing tickets</Typography>
-        {eventInfo.tickets.list.map((ticket, index) => (
-          <Typography key={index} variant="body2">Name: {ticket.name}, Price: {ticket.price}</Typography>)
+        {eventInfo.tickets.map((ticket, index) => (
+          <Typography key={index} variant="body2">Name: {ticket.name}, Price: {ticket.price} <Button size="sm" color="secondary" onClick={() => handleRemove(index)}>Remove</Button> </Typography>)
         )}
         <Divider/>
         <TicketForm handleSubmit={handleSubmit} />

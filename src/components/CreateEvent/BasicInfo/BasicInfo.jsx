@@ -1,6 +1,4 @@
 import React from "react";
-import { eventInfoContext } from "../CreateEventBase";
-import { useFormikChangeHandler } from "../useChangeHandler";
 import Card from "@material-ui/core/Card";
 import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
@@ -8,6 +6,7 @@ import { makeStyles } from "@material-ui/styles";
 import { useFormik } from "formik";
 import CardHeader from "@material-ui/core/CardHeader";
 import CardContent from "@material-ui/core/CardContent";
+import { Context, actionTypes } from "../../../Stores/EventInfoStore";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -17,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
 
 const BasicInfo = (...props) => {
   const classes = useStyles();
-  const eventInfo = React.useContext(eventInfoContext);
+  const [eventInfo, dispatch] = React.useContext(Context);
 
   const formik = useFormik({
     initialValues: {
@@ -39,16 +38,23 @@ const BasicInfo = (...props) => {
     },
     onSubmit: (values) => {
       // handle the submit
+      alert(JSON.stringify(values, null, 2));
     },
   });
 
-  eventInfo.submitHandler = formik.handleSubmit;
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    dispatch({type: actionTypes.basicInfo_set, payload: { name, value }});
+    formik.handleChange(event);
+  };
 
-  const changeHandler = useFormikChangeHandler(
-    formik,
-    "basicInfo",
-    eventInfo.onChange
-  );
+  // eventInfo.submitHandler = (payload) => dispatch({type: "SET_BASICINFO", payload });
+
+  // const changeHandler = useFormikChangeHandler(
+  //   formik,
+  //   "basicInfo",
+  //   eventInfo.onChange
+  // );
 
   return (
     <Card className={classes.root}>
@@ -65,7 +71,7 @@ const BasicInfo = (...props) => {
               name="name"
               label="Firstname"
               value={formik.values.name}
-              onChange={changeHandler}
+              onChange={handleChange}
               required
               helperText={formik.errors.name}
               error={formik.touched.name && Boolean(formik.errors.name)}
@@ -79,7 +85,7 @@ const BasicInfo = (...props) => {
               name="email"
               label="Email address"
               value={formik.values.email}
-              onChange={changeHandler}
+              onChange={handleChange}
               required
               helperText={formik.errors.email}
               error={formik.touched.email && Boolean(formik.errors.email)}

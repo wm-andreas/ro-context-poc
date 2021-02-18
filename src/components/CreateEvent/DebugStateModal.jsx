@@ -11,6 +11,7 @@ import {
 } from "@material-ui/core";
 import { BugReport } from "@material-ui/icons";
 import Slide from "@material-ui/core/Slide";
+import {Context} from '../../Stores/EventInfoStore';
 
 const useStyles = makeStyles((theme) => ({
   fab: {
@@ -26,8 +27,10 @@ const useStyles = makeStyles((theme) => ({
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction={"up"} ref={ref} {...props} />;
 });
-const DebugStateModal = ({eventInfo}) => {
+const DebugStateModal = () => {
   const classes = useStyles();
+  const [eventInfo] = React.useContext(Context);
+
   const [state, setState] = React.useState({
     isOpen: false,
   });
